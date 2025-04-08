@@ -111,8 +111,27 @@ class Babbler:
         and that any n-grams that stops a sentence should be followed by the
         special symbol 'EOL' in the state transition table. 'EOL' is short for 'end of line'; since it is capitalized and all our input texts are lower-case, it will be unambiguous.
         """
+        words = sentence.lower().split()
 
-        pass #The pass statement is used as a placeholder for future code. When the pass statement is executed, nothing happens, but you avoid getting an error when empty code is not allowed. Empty code is not allowed in loops, function definitions, class definitions, or in if statements.
+        if len(words) < self.n: #don't add if remaining words are less than ngram length
+            return
+        
+        for x in range(len(words) - self.n + 1):
+            state = ' '.join(words[x:x + self.n])
+
+            if x == 0:
+                self.starters.append(state)
+            
+            if x + self.n < len(words):
+                nextWord = words[x + self.n]
+            else:
+                nextWord = 'EOL'
+                self.stoppers.append(state)
+            
+            if state not in self.brainGraph:
+                self.brainGraph[state] = []
+            
+            self.brainGraph[state].append(nextWord)
 
 
     def get_starters(self):
@@ -121,7 +140,7 @@ class Babbler:
         The resulting list may contain duplicates, because one n-gram may start
         multiple sentences. Probably a one-line method.
         """
-        pass
+        return self.starters
     
 
     def get_stoppers(self):
@@ -130,7 +149,7 @@ class Babbler:
         The resulting value may contain duplicates, because one n-gram may stop
         multiple sentences. Probably a one-line method.
         """
-        pass
+        return self.stoppers
 
 
     def get_successors(self, ngram):
@@ -146,7 +165,12 @@ class Babbler:
         If the given state never occurs, return an empty list.
         """
 
-        pass
+        successors = []
+
+        if ngram in self.brainGraph:
+            successors = self.brainGraph[ngram]
+        
+        return successors
     
 
     def get_all_ngrams(self):
@@ -155,7 +179,7 @@ class Babbler:
         Probably a one-line method.
         """
 
-        pass
+        return list(self.brainGraph.keys())
 
     
     def has_successor(self, ngram):
@@ -166,7 +190,7 @@ class Babbler:
         Probably a one-line method.
         """
 
-        pass
+        return ngram in self.brainGraph and len(self.brainGraph[ngram]) > 0
     
     
     def get_random_successor(self, ngram):
@@ -181,7 +205,11 @@ class Babbler:
         we should get 'quickly' about 1/3 of the time, and 'with' 2/3 of the time.
         """
 
-        pass
+        successors = self.get_successors(ngram)
+
+        if not successors:
+            return None
+        return random.choice(successors)
     
 
     def babble(self):
@@ -199,7 +227,26 @@ class Babbler:
         6: Repeat from step 2.
         """
 
-        pass
+        if not self.starters:
+            return ""
+        
+        current_ngram = random.choice(self.starters)
+        words = current_ngram.split()
+
+        while True:
+            nextWord = self.get_random_successor(current_ngram)
+
+            if nextWord == 'EOL':
+                break
+
+            words.append(nextWord)
+
+            ngram_words = current_ngram.split()
+            ngram_words.pop(0)
+            ngram_words.append(nextWord)
+            current_ngram = ' '.join(str(word) for word in ngram_words)
+        
+        return ' '.join(words)
             
 
 # nothing to change here; read, understand, move along
