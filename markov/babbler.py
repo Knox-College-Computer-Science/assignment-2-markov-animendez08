@@ -1,3 +1,5 @@
+#name: anissa mendez
+
 import random
 import glob
 import sys
